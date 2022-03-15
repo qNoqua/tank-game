@@ -1,0 +1,78 @@
+$color: rgb(221, 210, 210);
+$color2: rgb(79, 167, 79);
+
+// @mixin maxim {
+//     &::before {
+//         content: "Maxim";
+//         position: absolute;
+//         width: 10px;
+//         height: 10px;
+//         background: greenyellow;
+//     }
+//     &::after {
+//         content: "";
+//         position: absolute;
+//         left: 30px;
+//         width: 10px;
+//         height: 10px;
+//         background: red;
+//     }
+// }
+@mixin misha($cvet: red, $razmer: 10px) {
+    border: 1px solid $cvet;
+    width: $razmer;
+    height: $razmer;
+}
+.container {
+    display: flex;
+    position: relative;
+
+    & > .row {
+        & > .cell {
+            @include misha($color, 50px);
+            background-color: rgb(143, 182, 143);
+            background-image: url(../pictures/kust.png);
+            background-size: contain;
+            background-repeat: no-repeat;
+            &[data-type="M"] {
+                background-image: url(../pictures/stone.png)
+            }
+            &[data-type="T"] {
+                background-image: url(../pictures/tank.png);
+      
+                &.right {
+                    transform: rotate(90deg);
+                }
+                &.left {
+                    transform: rotate(-90deg);
+                }
+                &.down {
+                    transform: rotate(180deg);
+                }
+            }
+            &[data-type="B"] {
+                background-image: url(../pictures/bullet.png);
+            }
+        }
+        & > .cell:nth-child(even) {
+            padding: 4px;
+            // @include maxim;
+        }
+    }
+    & > .row:nth-child(1) {
+        background: rosybrown;
+    }
+}
+
+
+// :root{
+//     --keksim: blue;
+//     --vw: 1vw;
+//     --vh: 1vh;
+//     --header-size: 100px;
+//     .container {
+//         background: var(--keksim);
+//         // height: calc((var(--vh, 1vh) * 100) - var(--header-size));
+//         height: calc(var(--vh, 1px) * 100);
+//     }
+// }
