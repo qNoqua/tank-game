@@ -30,7 +30,7 @@ export class Battlefield {
     console.log(this.coordinates)
     setInterval(() => {
       this.updateBulletPosition();
-    },150)
+    }, 150)
   }
   createArea(width, height) {
     /*
@@ -90,12 +90,27 @@ export class Battlefield {
     this.updateBattlefieldCoordinates(item.coordinates, item.coordinates, INDICATORS.tank);
     return item;
   }
+  getTankByCoords(x, y) {
+    return this.tanks.find((tank) => {
+      if (tank.coordinates.x === x && tank.coordinates.y === y) return true;
+      return false;
+    });
+  }
   isTankOnCoord(x, y) {
     /* 
       метод проверки наличия танка на передаваемых координатах
       переменная ready - boolean.
       цикл перебора танков в массиве tanks
       условие: если координаты танка совпадают с переданными, вернуть true
+
+    */
+    return this.tanks.some((tank) => {
+      if (tank.coordinates.x === x && tank.coordinates.y === y) return true;
+      return false;
+    });
+  }
+  isMountOnCoords(x, y) {
+    /* 
       цикл перебора гор в массиве mountains
       условие: если координаты горы совпадают с переданными, отнимаем у горы HP 
       если у горы HP <= 0, вызываем метод разушения горы
@@ -103,9 +118,6 @@ export class Battlefield {
       если HP больше, ready = true
     */
     let ready = false;
-    for (let tank of this.tanks) {
-      if (tank.coordinates.x === x && tank.coordinates.y === y) ready = true;
-    }
     for (let mount of this.mountains) {
       if (mount.coordinates.x === x && mount.coordinates.y === y) {
         mount.hp--;
@@ -133,6 +145,7 @@ export class Battlefield {
     let tank = this.tanks[id];
     if (tank === undefined) return 'error';
     if (this.isTankOnCoord(coordinates.x, coordinates.y)) return 'error';
+    if (this.isMountOnCoords(coordinates.x, coordinates.y)) return 'error';
     if (this.isPointOnArea(coordinates.x, coordinates.y) !== true) return 'error';
     this.updateBattlefieldCoordinates(tank.coordinates, coordinates, INDICATORS.tank);
     this.tanks[id].coordinates = coordinates;
@@ -183,6 +196,7 @@ export class Battlefield {
      */
     const bullet = {
       coordinates: this.changeBulletCoordinates(coordinates),
+      id: this.bullets.length,
       damage: 15,
     }
     this.bullets.push(bullet);
@@ -205,7 +219,7 @@ export class Battlefield {
       case "right": {
         return { x: coordinates.x, y: coordinates.y + 1, direction: coordinates.direction }
       }
-  }
+    }
   }
   updateBulletPosition() {
     /* 
@@ -220,9 +234,45 @@ export class Battlefield {
         x: bullet.coordinates.x,
         y: bullet.coordinates.y,
       }
-      bullet.coordinates = this.changeBulletCoordinates(bullet.coordinates);
-      this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.bullet)
+      if (this.collisionBullet(bullet.id)) {
+        bullet.coordinates = this.changeBulletCoordinates(bullet.coordinates);
+        this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.bullet);
+      }
+      else {
+        this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.kust);
+      }
     }
     console.log(this.bullets)
+  }
+  collisionBullet(id) {
+    const bullet = this.bullets[id];
+    let x = bullet.coordinates.x;
+    let y = bullet.coordinates.y;
+    if (['top', 'down'].includes(bullet.coordinates.direction)) {
+      x = x + (bullet.coordinates.direction == 'top' ? -1 : 1);
+    }
+    if (['left', 'right'].includes(bullet.coordinates.direction)) {
+      y = y + (bullet.coordinates.direction == 'left' ? -1 : 1);
+    }
+    if (!this.isPointOnArea(x, y)) {
+      this.removeBullet(id);
+      return false;
+    }
+    if (this.isMountOnCoords(x, y)) {
+      this.removeBullet(id);
+      return false;
+    }
+    const tank = this.getTankByCoords(x, y)
+    if (tank !== undefined) {
+      console.log(tank);
+      return false;
+    }
+    return true;
+  }
+  removeBullet(id) {
+    this.bullets = this.bullets.filter((bullet) => {
+      if (id === bullet.id) return false;
+      else true;
+    })
   }
 }
