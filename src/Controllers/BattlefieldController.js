@@ -3,38 +3,58 @@ import { throttle } from "../utils/helpers";
 
 
 export class BattlefieldController {
-    constructor(battlefield, tank, config) {                                                  //в класс контроллера пеедаем поле боя (battlefield), танк (tank), параметры танка (config)
+    constructor(battlefield, tank, config) {
         /* 
             класс для управления танком
             принимает поле боя, танк и его параметры
             при создании контроллера записываем в него передаваемое поле боя, танк и параметры
-            записываем танк в контроллер
-            
+            записываем танк в класс контроллер
+            записываем в переменную oneKeyDown функцию throttle и передаем в нее исполняемую функцию и время выполнения
+            вызываем метод построения макета (при создании инстанса)
+            создаем и записываем игрока в переменную player с помощью метода класса battlefield.addPlayer с передаными параметрами
+            вызываем метод визуального обновления игроков и их отрисовку на поле
+            обновляем направление танка
+            вызываем слушатель событий
         */
         this.battlefield = battlefield;
         this.tank = tank;
         this.config = config;
-        this.onKeyDown = throttle(this.onKeyDown, 150)                                        //записываем функцию в this и передаем ее в функию trottle
-        this.initBattlefieldView();                                                           //вызываем метод построения макета
-        this.player = battlefield.addPlayer(tank, config);                                    //добавляем игрока и его координаты
+        this.onKeyDown = throttle(this.onKeyDown, 150);
+        this.onFireButtonPress = throttle(this.onFireButtonPress, 2000);
+        this.initBattlefieldView();
+        this.player = battlefield.addPlayer(tank, config);
         console.log(this.player)
-        this.updatePlayer();                                                                  //вызываем метод обновления игроков
+        this.updatePlayer();
         this.updateTankPosition(config.direction)
-        this.eventListener();                                                                 //вызываем слушатель событий
+        this.eventListener();
     }
-    initBattlefieldView() {                                                                   //визуализируем поле боя
-        this.battlefieldView = new BattlefieldViews;                                          //создаем инстанс класса отрисовки
-        this.battlefieldView.init(this.battlefield.coordinates)                               //создаем поле боя по передаваемым координатам          
+    initBattlefieldView() {
+        /* 
+            создаем инстанс класса отрисовки
+            после создания макета визуализируем поле боя по преданным координатам (размеру)
+        */
+        this.battlefieldView = new BattlefieldViews;
+        this.battlefieldView.init(this.battlefield.coordinates)
     }
-    updatePlayer() {                                                                          //метод для переотрисовки поля
+    updatePlayer() {
+        /* 
+            метод для переотрисовки поля
+        */
         this.battlefieldView.update(this.battlefield.coordinates);
     }
-    onKeyDown(e) {                                                                            //функция-событие
-        // console.log(this);                                                                    //выводим контекст в консоль
-        // console.log(e.code);                                                                  //выводим в консоль нажатую клавишу
-        if (e.code === this.config.control.UP) {                                              //если нажатая клавиша === *** 
-            this.moveTop();                                                                   //вызываем метод движения
-            this.updatePlayer();                                                              //перерисовываем поле
+    onKeyDown(e) {
+        /* 
+            метод слушателей события
+            если нажатая клавиша === ***,
+            вызываем метод движения
+            перерисовываем поле
+        */
+
+        // console.log(this);
+        // console.log(e.code);
+        if (e.code === this.config.control.UP) {
+            this.moveTop();
+            this.updatePlayer();
         }
         if (e.code === this.config.control.DOWN) {
             this.moveDown();
@@ -48,23 +68,41 @@ export class BattlefieldController {
             this.moveRight();
             this.updatePlayer();
         }
-        if (e.code === this.config.control.FIRE) {
-            this.fire();
-        }
     }
-    eventListener() {                                                                         //слушатель событий
-        document.addEventListener('keydown', (e) => this.onKeyDown(e))                        //вызываем слушатель и выполняем функцию-событие при нажатии
+    eventListener() {
+        /* 
+            метод вызова слушателя событий
+            вызывает слушатель событий
+            вызывает метод из класса Battlefield, куда передаем функцию callback
+        */
+        document.addEventListener('keydown', (e) => this.onFireButtonPress(e));
+        document.addEventListener('keydown', (e) => this.onKeyDown(e));
+        this.battlefield.addBulletUpdateCallback((bullet) => {
+            this.battlefieldView.updateBulletDirection(bullet);
+        })
     }
-    updateConfig(result) {                                                                    //обновление параметров танка //принимает координаты или ошибку
-        if (result !== 'error') {                                                             //если пришедший результат не равен ошибке
-            this.config.x = result.coordinates.x;                                             //заменить координаты танка на пришедшие координаты из result
+    updateConfig(result) {
+        /*
+            обновление параметров танка 
+            принимает координаты или ошибку
+            если пришедший результат не равен ошибке
+            заменить координаты танка на пришедшие координаты из result 
+        */
+        if (result !== 'error') {
+            this.config.x = result.coordinates.x;
             this.config.y = result.coordinates.y;
         }
     }
-    moveTop() {                                                                               //метод движения танка
-        const { x, y } = this.config;                                                         //записываем в объект текущие параметры
-        const result = this.battlefield.setTankPosition(this.player.id, { y, x: x - 1 });     //вызываем метод для установки танка на позицию, отличную на 1 яечйку по каждому клику записываем в result
-        this.updateConfig(result);                                                            //передаем result для обновления параметров
+    moveTop() {
+        /*         
+            метод движения танка
+            записываем в объект текущие параметры
+            вызываем метод для установки танка на позицию, отличную на 1 яечйку по каждому клику записываем в result
+            передаем result для обновления параметров 
+        */
+        const { x, y } = this.config;
+        const result = this.battlefield.setTankPosition(this.player.id, { y, x: x - 1 });
+        this.updateConfig(result);
         this.updateTankPosition('top');
     }
     moveDown() {
@@ -86,12 +124,21 @@ export class BattlefieldController {
         this.updateTankPosition('right');
     }
     updateTankPosition(direction) {
+        /* 
+            метод обновления позиции танка
+            записываем переданное направление танка в его параметры
+            вызываем метод визуального обновления танка
+        */
         this.player.coordinates.direction = direction;
         this.battlefieldView.updateTankPosition(this.player.coordinates, this.player.id, direction)
 
     }
-    fire () {
-        this.battlefield.addBullet(this.player.coordinates)
-        
+    onFireButtonPress(e) {
+        /*
+            метод вызова добавления пули
+        */
+        if (e.code === this.config.control.FIRE) {
+            this.battlefield.addBullet(this.player.coordinates)
+        }
     }
 }

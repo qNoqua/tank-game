@@ -1,9 +1,9 @@
 export class BattlefieldViews {
     init(coordinates) {                                                                         //графическое отображение в браузере
-        if (document.querySelector('.container') !== null) return; 
+        if (document.querySelector('.container') !== null) return;
         this.coordinates = coordinates;                                                         //записываем передаваемые координаты в this
         let rootDiv = document.createElement('div');                                            //создаем див-контейнер
-                                                       //отображение flex
+        //отображение flex
         rootDiv.classList.add('container');                                                     //добавляем класс контейнеру
         for (let y = 0; y < coordinates.length; y++) {                                          //цикл от 0 до количества вложенных массивов в родительском массиве координат ;y++
             let row = coordinates[y];                                                           //присваиваем переменной текущий массив (строка - у)
@@ -34,15 +34,19 @@ export class BattlefieldViews {
         section.dataset.y = y;
         return section;                                                                         //возвращаем готовый див
     }
-    updateTankPosition (coordinates, playerId, direction) {
-        const id$ = document.getElementById(playerId)
-        if (id$) {
-            id$.removeAttribute('id');
-            id$.classList.remove('left', 'right', 'top', 'down');
+    updateTankPosition(coordinates, playerId, direction) {
+        const $id = document.getElementById(playerId)
+        if ($id) {
+            $id.removeAttribute('id');
+            $id.classList.remove('left', 'right', 'top', 'down');
         }
-        const tank$ = document.querySelector(`[data-y="${coordinates.x}"][data-x="${coordinates.y}"]`);
-        tank$.id = playerId;
-        tank$.classList.add(direction);
-        // console.log(document.querySelector(`[data-y="${coordinates.x}"][data-x="${coordinates.y}"]`))
+        const $tank = document.querySelector(`[data-y="${coordinates.x}"][data-x="${coordinates.y}"]`);
+        $tank.id = playerId;
+        $tank.classList.add(direction);
+    }
+    updateBulletDirection(bullet) {
+        const $bullet = document.querySelector(`[data-y="${bullet.coordinates.x}"][data-x="${bullet.coordinates.y}"]`);
+        $bullet.dataset.bulletId = bullet.id;
+        $bullet.classList.add(bullet.coordinates.direction);
     }
 }

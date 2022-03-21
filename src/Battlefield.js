@@ -24,13 +24,11 @@ export class Battlefield {
   bullets = [];
   mountains = [];
   coordinates = [];
+  timers = [];
+  bulletCounter = 0;
   constructor(width = 8, height = 8) {
     this.createArea(width, height);
     this.addMountains(width, height);
-    console.log(this.coordinates)
-    setInterval(() => {
-      this.updateBulletPosition();
-    }, 150)
   }
   createArea(width, height) {
     /*
@@ -191,19 +189,34 @@ export class Battlefield {
     /*
       метод добавления пули
       создаем объект пули,
-      с координатами и наносимым уроном 
-      координаты пули - координата танка, смещенная на одну клетку, в сторону направления танка
+      с координатами, id и наносимым уроном 
+      координаты пули - координата танка, смещенная на одну клетку, в сторону направления танка, для этого вызываем метод changeBulletCoordinates
+      создаем timer, который вызывает setInterval,
+      где если перед пулей нет препятствия (isBulletAvailable == true),
+      вызываем таймер снова
      */
+    const newCoordinates = this.changeBulletCoordinates(coordinates)
     const bullet = {
-      coordinates: this.changeBulletCoordinates(coordinates),
-      id: this.bullets.length,
+      coordinates: newCoordinates,
+      id: this.bulletCounter,
       damage: 15,
     }
+    const timer = () => setTimeout(() => {
+      const isBulletAvailable = this.isBulletAvailableToMove(bullet)
+      if (isBulletAvailable) {
+        timer();
+        if (typeof this.bulletUpdateCallback === 'function') this.bulletUpdateCallback(bullet);
+      }
+    }, 150);
     this.bullets.push(bullet);
+    this.bulletCounter++;
+    timer();
+    this.updateBattlefieldCoordinates(newCoordinates, newCoordinates, INDICATORS.bullet);
+    if (typeof this.bulletUpdateCallback === 'function') this.bulletUpdateCallback(bullet);
   }
   changeBulletCoordinates(coordinates) {
     /* 
-      выбор начаьных координат пули
+      выбор началльных координат пули
       если напрвление танка ****, координаты в сторону направления на 1 клетку
     */
     switch (coordinates.direction) {
@@ -221,38 +234,46 @@ export class Battlefield {
       }
     }
   }
-  updateBulletPosition() {
+  isBulletAvailableToMove(bullet) {
     /* 
-      обновление позиции пули
-      цикл по всем пулям в массиве
-      старые координаты заменить на новые коодинаты через метод changeBulletCoordinates
-      обновить координаты у пули через обновление координат updateBattlefieldCoordinates
+      создаем старые координаты
+      если перед пулей нет сущости или края карты, 
+      координаты пули = изменить на 1 через changeBulletCoordinates
+      и заменить иконки
+      вернуть true
+      иначе, если есть препятствие, поменять иконку пули на куст и вернуть false
     */
-    for (let i = 0; i < this.bullets.length; i++) {
-      const bullet = this.bullets[i];
-      const oldCoordinates = {
-        x: bullet.coordinates.x,
-        y: bullet.coordinates.y,
-      }
-      if (this.collisionBullet(bullet.id)) {
-        bullet.coordinates = this.changeBulletCoordinates(bullet.coordinates);
-        this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.bullet);
-      }
-      else {
-        this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.kust);
-      }
+    const oldCoordinates = {
+      x: bullet.coordinates.x,
+      y: bullet.coordinates.y,
     }
-    console.log(this.bullets)
+    if (this.collisionBullet(bullet.id)) {
+      bullet.coordinates = this.changeBulletCoordinates(bullet.coordinates);
+      this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.bullet);
+      return true;
+    }
+    else {
+      this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.kust);
+      return false;
+    }
+    
   }
   collisionBullet(id) {
-    const bullet = this.bullets[id];
+    const bullet = this.bullets.find((bullet) => {
+      if(bullet.id === id) return true;
+      return false;
+    });
+    if (!bullet) return;
     let x = bullet.coordinates.x;
     let y = bullet.coordinates.y;
+    // const bulletDiv = document.getAttribute('B');
     if (['top', 'down'].includes(bullet.coordinates.direction)) {
       x = x + (bullet.coordinates.direction == 'top' ? -1 : 1);
+      // console.log(bulletDiv)
     }
     if (['left', 'right'].includes(bullet.coordinates.direction)) {
       y = y + (bullet.coordinates.direction == 'left' ? -1 : 1);
+      // bullet.classList.add('bullet.coordinates.direction');
     }
     if (!this.isPointOnArea(x, y)) {
       this.removeBullet(id);
@@ -274,5 +295,11 @@ export class Battlefield {
       if (id === bullet.id) return false;
       else true;
     })
+  }
+  addBulletUpdateCallback(callback) {
+    /* 
+    получает функцию-иструкцию и записывает в this
+    */
+    this.bulletUpdateCallback = callback;
   }
 }

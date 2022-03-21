@@ -39,7 +39,6 @@ $color2: rgb(79, 167, 79);
             }
             &[data-type="T"] {
                 background-image: url(../pictures/tank.png);
-      
                 &.right {
                     transform: rotate(90deg);
                 }
@@ -52,6 +51,15 @@ $color2: rgb(79, 167, 79);
             }
             &[data-type="B"] {
                 background-image: url(../pictures/bullet.png);
+                &.right {
+                    transform: rotate(90deg);
+                }
+                &.left {
+                    transform: rotate(-90deg);
+                }
+                &.down {
+                    transform: rotate(180deg);
+                }
             }
         }
         & > .cell:nth-child(even) {
