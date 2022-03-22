@@ -23,7 +23,7 @@ export class BattlefieldController {
         this.onFireButtonPress = throttle(this.onFireButtonPress, 2000);
         this.initBattlefieldView();
         this.player = battlefield.addPlayer(tank, config);
-        console.log(this.player)
+        // console.log(this.player)
         this.updatePlayer();
         this.updateTankPosition(config.direction)
         this.eventListener();
@@ -49,9 +49,6 @@ export class BattlefieldController {
             вызываем метод движения
             перерисовываем поле
         */
-
-        // console.log(this);
-        // console.log(e.code);
         if (e.code === this.config.control.UP) {
             this.moveTop();
             this.updatePlayer();
@@ -79,6 +76,10 @@ export class BattlefieldController {
         document.addEventListener('keydown', (e) => this.onKeyDown(e));
         this.battlefield.addBulletUpdateCallback((bullet) => {
             this.battlefieldView.updateBulletDirection(bullet);
+        })
+        this.battlefield.addGameCallback((tank) => {
+            console.log(tank)
+            alert(`Игрок ${tank[0].tank.name} победил`)
         })
     }
     updateConfig(result) {
@@ -135,7 +136,7 @@ export class BattlefieldController {
     }
     onFireButtonPress(e) {
         /*
-            метод вызова добавления пули
+            если нажата кнопка FIRE, вызвать метод добавления пули addBullet у класса Battlefield
         */
         if (e.code === this.config.control.FIRE) {
             this.battlefield.addBullet(this.player.coordinates)

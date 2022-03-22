@@ -1,15 +1,12 @@
 import { Gun }  from "./Gun";
 import { Settings } from "./Settings";
-// import { Bullet } from "./Bullet";
 
 export class Tank {
     constructor (name){
         this.name = name;
         this.settings = new Settings(name)
+        this.health = this.settings[this.name].hp;
     }
-    get healh (){
-        return this.settings[this.name].hp;
-    }   
     get fire (){
         const config = this.settings[this.name];
         this.gun = new Gun(config.gun.random, config.gun.bullets);
@@ -18,7 +15,9 @@ export class Tank {
     get bullets () {
         return this.settings[this.name].gun.bullets;
     }
-     
+    doDamage (bullet) {
+        return this.health = this.health - bullet.damage;
+    }
 }
 
 

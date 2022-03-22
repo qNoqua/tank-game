@@ -199,7 +199,7 @@ export class Battlefield {
     const bullet = {
       coordinates: newCoordinates,
       id: this.bulletCounter,
-      damage: 15,
+      damage: 150,
     }
     const timer = () => setTimeout(() => {
       const isBulletAvailable = this.isBulletAvailableToMove(bullet)
@@ -256,11 +256,11 @@ export class Battlefield {
       this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.kust);
       return false;
     }
-    
+
   }
   collisionBullet(id) {
     const bullet = this.bullets.find((bullet) => {
-      if(bullet.id === id) return true;
+      if (bullet.id === id) return true;
       return false;
     });
     if (!bullet) return;
@@ -269,7 +269,7 @@ export class Battlefield {
     // const bulletDiv = document.getAttribute('B');
     if (['top', 'down'].includes(bullet.coordinates.direction)) {
       x = x + (bullet.coordinates.direction == 'top' ? -1 : 1);
-      // console.log(bulletDiv)
+
     }
     if (['left', 'right'].includes(bullet.coordinates.direction)) {
       y = y + (bullet.coordinates.direction == 'left' ? -1 : 1);
@@ -285,7 +285,13 @@ export class Battlefield {
     }
     const tank = this.getTankByCoords(x, y)
     if (tank !== undefined) {
-      console.log(tank);
+      const health = tank.tank.health;
+      tank.tank.doDamage(bullet);
+      if (health <= 0) {
+        this.removeTank(tank.id);
+        this.updateBattlefieldCoordinates(tank.coordinates, tank.coordinates, INDICATORS.kust)
+        this.gameOverCallback(this.tanks);
+      }
       return false;
     }
     return true;
@@ -293,7 +299,7 @@ export class Battlefield {
   removeBullet(id) {
     this.bullets = this.bullets.filter((bullet) => {
       if (id === bullet.id) return false;
-      else true;
+      return true;
     })
   }
   addBulletUpdateCallback(callback) {
@@ -301,5 +307,14 @@ export class Battlefield {
     получает функцию-иструкцию и записывает в this
     */
     this.bulletUpdateCallback = callback;
+  }
+  removeTank(id) {
+    this.tanks = this.tanks.filter((tank) => {
+      if (id === tank.id) return false;
+      return true;
+    })
+  }
+  addGameCallback(callback) {
+    this.gameOverCallback = callback;
   }
 }

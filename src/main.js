@@ -10,11 +10,9 @@ const tank2 = new Tank('tank_2');
 
 const connection = new Connection();
 const areaSize = connection.whatIsThisSize();
-console.log(areaSize);
 
 areaSize.then(function(size){
     let _size = size;
-    console.log(size);
     let positionY = Math.floor(_size.y/2);
     let positionX_1 = 0;
     let positionX_2 = _size.x-1;
