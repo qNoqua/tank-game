@@ -1,6 +1,6 @@
 export const INDICATORS = {
-    empty: ' ',
-    tank: 'T',
-    mount: 'M',
-    bullet: 'B',
-}   
+  empty: " ",
+  tank: "T",
+  mount: "M",
+  bullet: "B",
+};

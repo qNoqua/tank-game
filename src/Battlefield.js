@@ -52,14 +52,15 @@ export class Battlefield {
     по координатам каждого item-a на поле создается элемент из INDICATORS
     item добавляется в массив mountains
     */
-    const mountCount = Math.round((Math.random() * width) + (Math.random() * height)) * 2;
+    const mountCount =
+      Math.round(Math.random() * width + Math.random() * height) * 2;
     for (let i = 0; i < mountCount; i++) {
-      const x = Math.floor(Math.random() * width)
-      const y = Math.floor(Math.random() * height)
+      const x = Math.floor(Math.random() * width);
+      const y = Math.floor(Math.random() * height);
       const item = {
         coordinates: { x, y },
         hp: 3,
-      }
+      };
       this.coordinates[y][x] = INDICATORS.mount;
       this.mountains.push(item);
     }
@@ -79,13 +80,22 @@ export class Battlefield {
       tank: tank,
       coordinates: coordinates,
       id: this.tanks.length,
-    }
-    if (this.tanks.length >= this.coordinates[0].length * this.coordinates.length) return 'error';
+    };
+    if (
+      this.tanks.length >=
+      this.coordinates[0].length * this.coordinates.length
+    )
+      return "error";
 
-    if (this.isTankOnCoord(item.coordinates.x, item.coordinates.y)) return 'error';
+    if (this.isTankOnCoord(item.coordinates.x, item.coordinates.y))
+      return "error";
 
     this.tanks.push(item);
-    this.updateBattlefieldCoordinates(item.coordinates, item.coordinates, INDICATORS.tank);
+    this.updateBattlefieldCoordinates(
+      item.coordinates,
+      item.coordinates,
+      INDICATORS.tank
+    );
     return item;
   }
   getTankByCoords(x, y) {
@@ -122,8 +132,7 @@ export class Battlefield {
         if (mount.hp <= 0) {
           this.destroyMount(mount);
           ready = false;
-        }
-        else {
+        } else {
           ready = true;
         }
       }
@@ -141,11 +150,16 @@ export class Battlefield {
       иначе обновляем координаты танка 
     */
     let tank = this.tanks[id];
-    if (tank === undefined) return 'error';
-    if (this.isTankOnCoord(coordinates.x, coordinates.y)) return 'error';
-    if (this.isMountOnCoords(coordinates.x, coordinates.y)) return 'error';
-    if (this.isPointOnArea(coordinates.x, coordinates.y) !== true) return 'error';
-    this.updateBattlefieldCoordinates(tank.coordinates, coordinates, INDICATORS.tank);
+    if (tank === undefined) return "error";
+    if (this.isTankOnCoord(coordinates.x, coordinates.y)) return "error";
+    if (this.isMountOnCoords(coordinates.x, coordinates.y)) return "error";
+    if (this.isPointOnArea(coordinates.x, coordinates.y) !== true)
+      return "error";
+    this.updateBattlefieldCoordinates(
+      tank.coordinates,
+      coordinates,
+      INDICATORS.tank
+    );
     this.tanks[id].coordinates = coordinates;
     return tank;
   }
@@ -183,7 +197,7 @@ export class Battlefield {
       // if (item.hp < 1) return false;
       //   return true;
       return item.hp > 1;
-    })
+    });
   }
   addBullet(coordinates) {
     /*
@@ -195,24 +209,31 @@ export class Battlefield {
       где если перед пулей нет препятствия (isBulletAvailable == true),
       вызываем таймер снова
      */
-    const newCoordinates = this.changeBulletCoordinates(coordinates)
+    const newCoordinates = this.changeBulletCoordinates(coordinates);
     const bullet = {
       coordinates: newCoordinates,
       id: this.bulletCounter,
       damage: 150,
-    }
-    const timer = () => setTimeout(() => {
-      const isBulletAvailable = this.isBulletAvailableToMove(bullet)
-      if (isBulletAvailable) {
-        timer();
-        if (typeof this.bulletUpdateCallback === 'function') this.bulletUpdateCallback(bullet);
-      }
-    }, 150);
+    };
+    const timer = () =>
+      setTimeout(() => {
+        const isBulletAvailable = this.isBulletAvailableToMove(bullet);
+        if (isBulletAvailable) {
+          timer();
+          if (typeof this.bulletUpdateCallback === "function")
+            this.bulletUpdateCallback(bullet);
+        }
+      }, 150);
     this.bullets.push(bullet);
     this.bulletCounter++;
     timer();
-    this.updateBattlefieldCoordinates(newCoordinates, newCoordinates, INDICATORS.bullet);
-    if (typeof this.bulletUpdateCallback === 'function') this.bulletUpdateCallback(bullet);
+    this.updateBattlefieldCoordinates(
+      newCoordinates,
+      newCoordinates,
+      INDICATORS.bullet
+    );
+    if (typeof this.bulletUpdateCallback === "function")
+      this.bulletUpdateCallback(bullet);
   }
   changeBulletCoordinates(coordinates) {
     /* 
@@ -220,17 +241,33 @@ export class Battlefield {
       если напрвление танка ****, координаты в сторону направления на 1 клетку
     */
     switch (coordinates.direction) {
-      case 'top': {
-        return { y: coordinates.y, x: coordinates.x - 1, direction: coordinates.direction }
+      case "top": {
+        return {
+          y: coordinates.y,
+          x: coordinates.x - 1,
+          direction: coordinates.direction,
+        };
       }
       case "down": {
-        return { y: coordinates.y, x: coordinates.x + 1, direction: coordinates.direction }
+        return {
+          y: coordinates.y,
+          x: coordinates.x + 1,
+          direction: coordinates.direction,
+        };
       }
       case "left": {
-        return { x: coordinates.x, y: coordinates.y - 1, direction: coordinates.direction }
+        return {
+          x: coordinates.x,
+          y: coordinates.y - 1,
+          direction: coordinates.direction,
+        };
       }
       case "right": {
-        return { x: coordinates.x, y: coordinates.y + 1, direction: coordinates.direction }
+        return {
+          x: coordinates.x,
+          y: coordinates.y + 1,
+          direction: coordinates.direction,
+        };
       }
     }
   }
@@ -246,17 +283,23 @@ export class Battlefield {
     const oldCoordinates = {
       x: bullet.coordinates.x,
       y: bullet.coordinates.y,
-    }
+    };
     if (this.collisionBullet(bullet.id)) {
       bullet.coordinates = this.changeBulletCoordinates(bullet.coordinates);
-      this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.bullet);
+      this.updateBattlefieldCoordinates(
+        oldCoordinates,
+        bullet.coordinates,
+        INDICATORS.bullet
+      );
       return true;
-    }
-    else {
-      this.updateBattlefieldCoordinates(oldCoordinates, bullet.coordinates, INDICATORS.kust);
+    } else {
+      this.updateBattlefieldCoordinates(
+        oldCoordinates,
+        bullet.coordinates,
+        INDICATORS.kust
+      );
       return false;
     }
-
   }
   collisionBullet(id) {
     const bullet = this.bullets.find((bullet) => {
@@ -267,12 +310,11 @@ export class Battlefield {
     let x = bullet.coordinates.x;
     let y = bullet.coordinates.y;
     // const bulletDiv = document.getAttribute('B');
-    if (['top', 'down'].includes(bullet.coordinates.direction)) {
-      x = x + (bullet.coordinates.direction == 'top' ? -1 : 1);
-
+    if (["top", "down"].includes(bullet.coordinates.direction)) {
+      x = x + (bullet.coordinates.direction == "top" ? -1 : 1);
     }
-    if (['left', 'right'].includes(bullet.coordinates.direction)) {
-      y = y + (bullet.coordinates.direction == 'left' ? -1 : 1);
+    if (["left", "right"].includes(bullet.coordinates.direction)) {
+      y = y + (bullet.coordinates.direction == "left" ? -1 : 1);
       // bullet.classList.add('bullet.coordinates.direction');
     }
     if (!this.isPointOnArea(x, y)) {
@@ -283,13 +325,17 @@ export class Battlefield {
       this.removeBullet(id);
       return false;
     }
-    const tank = this.getTankByCoords(x, y)
+    const tank = this.getTankByCoords(x, y);
     if (tank !== undefined) {
       const health = tank.tank.health;
       tank.tank.doDamage(bullet);
       if (health <= 0) {
         this.removeTank(tank.id);
-        this.updateBattlefieldCoordinates(tank.coordinates, tank.coordinates, INDICATORS.kust)
+        this.updateBattlefieldCoordinates(
+          tank.coordinates,
+          tank.coordinates,
+          INDICATORS.kust
+        );
         this.gameOverCallback(this.tanks);
       }
       return false;
@@ -300,7 +346,7 @@ export class Battlefield {
     this.bullets = this.bullets.filter((bullet) => {
       if (id === bullet.id) return false;
       return true;
-    })
+    });
   }
   addBulletUpdateCallback(callback) {
     /* 
@@ -312,7 +358,7 @@ export class Battlefield {
     this.tanks = this.tanks.filter((tank) => {
       if (id === tank.id) return false;
       return true;
-    })
+    });
   }
   addGameCallback(callback) {
     this.gameOverCallback = callback;

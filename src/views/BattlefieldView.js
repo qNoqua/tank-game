@@ -1,6 +1,6 @@
 export class BattlefieldViews {
-    init(coordinates) {
-        /* 
+  init(coordinates) {
+    /* 
             графическое отображение в браузере
             записываем передаваемые координаты в this
             создаем див-контейнер
@@ -14,24 +14,24 @@ export class BattlefieldViews {
             добавляем строку в контейнер
             добавляем контейнер на страницу
         */
-        if (document.querySelector('.container') !== null) return;
-        this.coordinates = coordinates;
-        let rootDiv = document.createElement('div');
-        rootDiv.classList.add('container');
-        for (let y = 0; y < coordinates.length; y++) {
-            let row = coordinates[y];
-            let rowDiv = document.createElement('div');
-            rowDiv.classList.add('row')
-            for (let x = 0; x < row.length; x++) {
-                let section = this.createSection(row[y], y, x);
-                rowDiv.appendChild(section);
-            }
-            rootDiv.appendChild(rowDiv);
-        }
-        document.body.appendChild(rootDiv);
+    if (document.querySelector(".container") !== null) return;
+    this.coordinates = coordinates;
+    let rootDiv = document.createElement("div");
+    rootDiv.classList.add("container");
+    for (let y = 0; y < coordinates.length; y++) {
+      let row = coordinates[y];
+      let rowDiv = document.createElement("div");
+      rowDiv.classList.add("row");
+      for (let x = 0; x < row.length; x++) {
+        let section = this.createSection(row[y], y, x);
+        rowDiv.appendChild(section);
+      }
+      rootDiv.appendChild(rowDiv);
     }
-    update(coordinates) {
-        /* 
+    document.body.appendChild(rootDiv);
+  }
+  update(coordinates) {
+    /* 
             метод обновления координат
             записываем передаваемые координаты в this
             цикл перебора вложенных массивов в родительском массиве
@@ -39,16 +39,17 @@ export class BattlefieldViews {
             перебираем каждый вложенный массив координат
             выбираем элемент документа по дата-атрибутам и присваеваем ему текст-контент соответствующего элемента
         */
-        this.coordinates = coordinates;
-        for (let y = 0; y < coordinates.length; y++) {
-            let row = coordinates[y];
-            for (let x = 0; x < row.length; x++) {
-                document.querySelector(`[data-y="${x}"][data-x="${y}"]`).dataset.type = row[x];
-            }
-        }
+    this.coordinates = coordinates;
+    for (let y = 0; y < coordinates.length; y++) {
+      let row = coordinates[y];
+      for (let x = 0; x < row.length; x++) {
+        document.querySelector(`[data-y="${x}"][data-x="${y}"]`).dataset.type =
+          row[x];
+      }
     }
-    createSection(content, x, y) {
-        /* 
+  }
+  createSection(content, x, y) {
+    /* 
             метод создания элементов
             создаем div и записываем его в переменную,
             добавляем ему css класс cell,
@@ -56,15 +57,15 @@ export class BattlefieldViews {
             добавляем data-атрибуты с коорднатами,
             возвращаем готовый элемент
         */
-        let section = document.createElement('div');
-        section.classList.add('cell')
-        section.dataset.type = content;
-        section.dataset.x = x;
-        section.dataset.y = y;
-        return section;
-    }
-    updateTankPosition(coordinates, playerId, direction) {
-        /* 
+    let section = document.createElement("div");
+    section.classList.add("cell");
+    section.dataset.type = content;
+    section.dataset.x = x;
+    section.dataset.y = y;
+    return section;
+  }
+  updateTankPosition(coordinates, playerId, direction) {
+    /* 
             метод поворота танка
             ищем элемент по id
             если находим, удаляем у него data-атрибут id
@@ -73,23 +74,27 @@ export class BattlefieldViews {
             присваеваем ему переданный id
             добавляем css свойство с направлением
         */
-        const $id = document.getElementById(playerId)
-        if ($id) {
-            $id.removeAttribute('id');
-            $id.classList.remove('left', 'right', 'top', 'down');
-        }
-        const $tank = document.querySelector(`[data-y="${coordinates.x}"][data-x="${coordinates.y}"]`);
-        $tank.id = playerId;
-        $tank.classList.add(direction);
+    const $id = document.getElementById(playerId);
+    if ($id) {
+      $id.removeAttribute("id");
+      $id.classList.remove("left", "right", "top", "down");
     }
-    updateBulletDirection(bullet) {
-        /* 
+    const $tank = document.querySelector(
+      `[data-y="${coordinates.x}"][data-x="${coordinates.y}"]`
+    );
+    $tank.id = playerId;
+    $tank.classList.add(direction);
+  }
+  updateBulletDirection(bullet) {
+    /* 
             метод поворота пули
             ищем пулю по координатам
             добавляем пуле css свойство в зависимости от направления
         */
-        const $bullet = document.querySelector(`[data-y="${bullet.coordinates.x}"][data-x="${bullet.coordinates.y}"]`);
-        // $bullet.dataset.bulletId = bullet.id;
-        $bullet.classList.add(bullet.coordinates.direction);
-    }
+    const $bullet = document.querySelector(
+      `[data-y="${bullet.coordinates.x}"][data-x="${bullet.coordinates.y}"]`
+    );
+    // $bullet.dataset.bulletId = bullet.id;
+    $bullet.classList.add(bullet.coordinates.direction);
+  }
 }
